@@ -56,14 +56,16 @@ func inRange(index: Int) -> Bool {
 }
 
 func unique_duplicates(boards: Array<Array<Array<String>>>) -> Array<Array<Array<String>>> {
-  var mins = [Decimal: Array<Array<String>>]()
-  boards.forEach { board in
-    let weights = directions.map({(dir:Array<Int>) -> Decimal in
+  var mins = [UInt64]()
+  var out_boards = Array<Array<Array<String>>>()
+  for board in boards {
+    print_board(board: board)
+    let weights = directions.map({(dir:Array<Int>) -> UInt64 in
+      print(dir)
       let x = dir[0]
       let y = dir[1]
-      var weight : Decimal = 0
+      var bits : UInt64 = 0b10000000
       for n in 0...N-1 {
-        var bits : UInt8 = 0b00000000
         for m in 0...N-1 {
           let i = x==0
             ? y == -1 ? N-1-n : n
@@ -74,24 +76,34 @@ func unique_duplicates(boards: Array<Array<Array<String>>>) -> Array<Array<Array
           let step = x==0 ? j : i
           if board[i][j] == EMPTY {
             bits = bits | (0b1 << step)
-//            print("empty found at ", i , j, bits, m, n, step)
+            print("empty found at \(i),\(j) bits=\(bits) m=\(m) n=\(n) step=\(step)")
           }
         }
-//        print(n, bits, Int(bits), pow(10, n))
-        weight += Decimal(bits) * (pow(10, n))
+        bits = bits << N
       }
-//      print(weight)
-      return weight
+      print(String(bits, radix: 2))
+      return bits
     })
-//    print(weights)
-    let min = weights.min()!
+    print(weights)
+//    for weight in weights { mins[weight] = board }
+//    let min = weights.min()!
 //    print(min)
-    mins[min] = board
+    var repeated = false
+    for weight in weights {
+      if mins.contains(weight) {
+        repeated = true
+      }
+      
+    }
+    if !repeated {
+      out_boards.append(board)
+      for weight in weights { mins.append(weight) }
+    }
   }
 //  print(mins)
 //  boards.removeAll()
-  print(mins.keys)
-  return Array(mins.values)
+//  print(mins.keys)
+  return out_boards
 //  return boards
 }
 
@@ -121,7 +133,4 @@ func iterate(in_boards : Array<Array<Array<String>>>) -> Array<Array<Array<Strin
 }
 
 boards = iterate(in_boards: boards)
-print_boards(boards: boards)
-boards = iterate(in_boards: boards)
-
 print_boards(boards: boards)
