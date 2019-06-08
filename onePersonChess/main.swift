@@ -23,27 +23,38 @@ let number2string = [
 ]
 
 typealias Piece = Int
-typealias Board = Array<Array<Piece>>
+typealias Table = Array<Array<Piece>>
+
+struct Board {
+  let table:Table
+  let path:String
+}
 
 let directions = [[1,0], [0,1],[-1,0],[0,-1]]
 
-var boards = [
-  [
-    [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
-    [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
-    
-    [PIECE, PIECE, PIECE, PIECE, PIECE, PIECE, PIECE],
-    [PIECE, PIECE, PIECE, EMPTY, PIECE, PIECE, PIECE],
-    [PIECE, PIECE, PIECE, PIECE, PIECE, PIECE, PIECE],
-    
-    [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
-    [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
+let initialBoard = Board(table:   [
+  [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
+  [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
+  
+  [PIECE, PIECE, PIECE, PIECE, PIECE, PIECE, PIECE],
+  [PIECE, PIECE, PIECE, EMPTY, PIECE, PIECE, PIECE],
+  [PIECE, PIECE, PIECE, PIECE, PIECE, PIECE, PIECE],
+  
+  [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
+  [BLOCK, BLOCK, PIECE, PIECE, PIECE, BLOCK, BLOCK],
   ]
+, path: "")
+
+var boards = [
+  initialBoard
 ]
 
 func print_board(board:Board) -> Void {
+  if board.path != "" {
+    print("Path: \(board.path)")
+  }
   print(
-    board
+    board.table
       .map{
         $0
           .map{number2string[$0]!}
@@ -61,8 +72,6 @@ func print_boards(boards:[Board]) -> Void {
   }
   print(boards.count , " boards printed\n")
 }
-
-//print_boards(boards: boards)
 
 let N = 7
 
@@ -87,7 +96,7 @@ func unique_duplicates(boards: [Board]) -> [Board] {
             ? x == -1 ? N-1-n : n
             : y == -1 ? N-1-m : m
           let step = x==0 ? j : i
-          if board[i][j] == EMPTY {
+          if board.table[i][j] == EMPTY {
             bits = bits | (0b1 << step)
             //            print("empty found at \(i),\(j) bits=\(bits) m=\(m) n=\(n) step=\(step)")
           }
@@ -113,17 +122,20 @@ func iterate(in_boards : [Board]) -> [Board] {
   func one_direction(dir:[Int]) -> [Board] {
     let x = dir[0]
     let y = dir[1]
+    let directionLetter = x == 0 ? y == 1 ? "R" : "L" : x == 1 ? "U" : "D"
+    
     var out_boards : [Board] = []
     for board in in_boards {
       for i in 0...N-1 {
         if inRange(index: i+x*2) {
           for j in 0...N-1 {
             if inRange(index:  j+y*2)  {
-              if (board[i][j] == PIECE && board[i+x][j+y] == PIECE && board[i+x*2][j+y*2] == EMPTY) {
-                var b:Board = NSArray(array:board, copyItems: true) as! Board
-                b[i][j] = EMPTY
-                b[i+x][j+y] = EMPTY
-                b[i+x*2][j+y*2] = PIECE
+              if (board.table[i][j] == PIECE && board.table[i+x][j+y] == PIECE && board.table[i+x*2][j+y*2] == EMPTY) {
+                var table = NSArray(array:board.table, copyItems: true) as! Table
+                table[i][j] = EMPTY
+                table[i+x][j+y] = EMPTY
+                table[i+x*2][j+y*2] = PIECE
+                let b:Board = Board(table: table, path: "\(board.path)\(j)\(i)\(directionLetter)")
                 out_boards.append(b)
               }
             }
@@ -144,7 +156,7 @@ func iterate(in_boards : [Board]) -> [Board] {
 let start = CFAbsoluteTimeGetCurrent()
 for i in 1...31 {
   let start = CFAbsoluteTimeGetCurrent()
-  boards = iterate(in_boards: Array(boards.suffix(1000)))
+  boards = iterate(in_boards: boards)
   let diff = CFAbsoluteTimeGetCurrent() - start
   print("step \(i) took \(diff) seconds with \(boards.count) boards")
 }
