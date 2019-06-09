@@ -80,7 +80,8 @@ func inRange(index: Int) -> Bool {
 }
 
 func unique_duplicates(boards: [Board]) -> [Board] {
-  var mins = [UInt64]()
+  var mins : Set<UInt64> = []
+  let before = boards.count
   let out_boards = boards.filter {
     let board = $0
     let weights = directions.map({(dir:[Int]) -> UInt64 in
@@ -111,9 +112,12 @@ func unique_duplicates(boards: [Board]) -> [Board] {
         return false
       }
     }
-    mins.append(contentsOf: weights)
+    for weight in weights {
+      mins.insert(weight)
+    }
     return true
   }
+  print("turned \(before) to \(out_boards.count) with \(mins.count) weights")
   mins.removeAll()
   return out_boards
 }
@@ -157,8 +161,9 @@ let start = CFAbsoluteTimeGetCurrent()
 for i in 1...31 {
   let start = CFAbsoluteTimeGetCurrent()
   boards = iterate(in_boards: boards)
-  let diff = CFAbsoluteTimeGetCurrent() - start
-  print("step \(i) took \(diff) seconds with \(boards.count) boards")
+  let now = CFAbsoluteTimeGetCurrent()
+  let diff = now - start
+  print("\(now): step \(i) took \(diff) seconds with \(boards.count) boards")
 }
 print_boards(boards: boards)
 
