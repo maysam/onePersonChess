@@ -139,7 +139,7 @@ func iterate(in_boards : [Board]) -> [Board] {
                 table[i][j] = EMPTY
                 table[i+x][j+y] = EMPTY
                 table[i+x*2][j+y*2] = PIECE
-                let b:Board = Board(table: table, path: "\(board.path)\(j)\(i)\(directionLetter)")
+                let b:Board = Board(table: table, path: "\(board.path)\(j+1)\(i+1)\(directionLetter)")
                 out_boards.append(b)
               }
             }
