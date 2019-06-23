@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>One Person Chess</title>
+</head>
+<body>
+  <img src="board.png" id="board" style="display: none;" />
+  <img src="peg.png" id="peg" style="display: none;" />
+  <img src="redpeg.png" id="redpeg" style="display: none;" />
+  <img src="hole.png" id="hole" style="display: none;" />
+  <center>
+    <canvas id="boardCanvas" width="400" height="400" style="border:1px solid #cbbfaa;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
+    <br />
+    <button onclick="restart()">Restart</button>
+  </center>
+  <script type="text/javascript">
+    var solution = '42U23R35D43L63L15R45L37D57L51U54D56D75L13R43L14R34U37D25R45R73U75L55D31U23R44D52U64L41U43U46D'
+    var lboard = []
+    var step = 0
+
+    function restart() {
+      lboard = [
+        ['x', 'x' , 'p', 'p', 'p', 'x', 'x'],
+        ['x', 'x' , 'p', 'p', 'p', 'x', 'x'],
+        ['p', 'p' , 'p', 'p', 'p', 'p', 'p'],
+        ['p', 'p' , 'p', 'h', 'p', 'r', 'p'],
+        ['p', 'p' , 'p', 'p', 'p', 'p', 'p'],
+        ['x', 'x' , 'p', 'p', 'p', 'x', 'x'],
+        ['x', 'x' , 'p', 'p', 'p', 'x', 'x'],
+      ]
+      step = 0
+      setTimeout(stepForward, 800)
+      draw()
+    }
+
+    window.onload = function() {
+      // var board = document.getElementById("board")
+      var peg = document.getElementById('peg')
+      var hole = document.getElementById('hole')
+      var redpeg = document.getElementById('redpeg')
+
+      var canvas = document.getElementById("boardCanvas")
+      var ctx = canvas.getContext("2d");
+
+      window.place_at = function(item, x, y) {
+        var left = -160 + x * 50
+        var top = 115 + y * 50
+        var angle = -45
+        ctx.rotate(angle * Math.PI / 180)
+        ctx.drawImage(item, left, top)
+        ctx.rotate(-angle * Math.PI / 180)
+      }
+
+      window.draw = function() {
+        ctx.fillStyle = '#cbbfaa'
+        ctx.fillRect(0,0,canvas.width,canvas.height)
+        for (var i = 0; i < 7; i++) {
+          for (var j = 0; j < 7; j++) {
+            var item = false
+            if (lboard[i][j] == 'p') {
+              item = peg
+            }
+            if (lboard[i][j] == 'r') {
+              item = redpeg
+            }
+            if (lboard[i][j] == 'h') {
+              item = hole
+            }
+            if (item) {
+              place_at(item, i, j)
+            }
+          }
+        }
+      }
+
+      // var tags = []
+      // for (var i = 0; i < 7; i++) {
+      //   for (var j = 0; j < 7; j++) {
+      //     if (!tags[i]) {
+      //       tags[i] = []
+      //     }
+      //     tags[i][j] = i+'-'+j
+      //   }
+      // }
+
+
+      window.move = function(xfrom, yfrom, direction) {
+        var starting_step = step
+        var xmid = xfrom
+        var ymid = yfrom
+        var xto = xfrom
+        var yto = yfrom
+        switch(direction) {
+          case 'R':
+            xto = xfrom + 2
+            xmid = xfrom + 1
+            break
+          case 'L':
+            xto = xfrom - 2
+            xmid = xfrom - 1
+            break
+          case 'U':
+            yto = yfrom + 2
+            ymid = yfrom + 1
+            break
+          case 'D':
+            yto = yfrom - 2
+            ymid = yfrom - 1
+            break
+        }
+        // tags[xto][yto] = tags[xfrom][xto]
+        // console.log(tags[xto][yto])
+        var xdraw = xfrom
+        var ydraw = yfrom
+        var mover = lboard[xfrom][yfrom]
+        var item = mover == 'p' ? peg : redpeg
+        function on1() {
+          if (starting_step != step) {
+            // do not move forward if restarted
+            return
+          }
+          xdraw += (xmid-xfrom)/16
+          ydraw += (ymid-yfrom)/16
+          draw()
+          place_at(item, xdraw, ydraw)
+          if (xdraw == xmid && ydraw == ymid) {
+            lboard[xmid][ymid] = 'h'
+            window.requestAnimationFrame(on2)
+          } else {
+            window.requestAnimationFrame(on1)
+          }
+        }
+        lboard[xfrom][yfrom] = 'h'
+        window.requestAnimationFrame(on1)
+        function on2() {
+          if (starting_step != step) {
+            // do not move forward if restarted
+            return
+          }
+          xdraw += (xto - xmid)/16
+          ydraw += (yto - ymid)/16
+          place_at(item, xdraw, ydraw)
+          if (xdraw == xto && ydraw == yto) {
+            lboard[xto][yto] = mover
+            draw()
+            step++
+            setTimeout(stepForward, 100)
+          } else {
+            window.requestAnimationFrame(on2)
+          }
+        }
+      }
+
+      window.stepForward = function() {
+        var i = step * 3
+        if (i < solution.length) {
+          var fromx = parseInt(solution[i])-1
+          var fromy = parseInt(solution[i+1])-1
+          var direction = solution[i+2]
+          move(fromx, fromy, direction)
+        }
+      }
+
+      setTimeout(restart, 500)
+    }
+  </script>
+</body>
+</html>
