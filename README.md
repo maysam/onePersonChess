@@ -1,7 +1,9 @@
 # onePersonChess
 finding the solution to onePersonChess using swift language
 
-![alt text](https://raw.githubusercontent.com/maysam/onePersonChess/master/onepersonchess.gif)
+Animated code showing the solution using HTML5 [open](https://maysam.github.io/onePersonChess/ "link")
+
+![animated solution](https://raw.githubusercontent.com/maysam/onePersonChess/master/onepersonchess.gif)
 
 There is only one solution to this game but i can have two final ending due to the nature of the game
 
